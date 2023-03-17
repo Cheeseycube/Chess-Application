@@ -1,0 +1,20 @@
+Site Chess.com
+Date 2023.02.28
+Round -
+White Cheesecube01
+Black Mr_smartX
+Result 1-0
+CurrentPosition 8/8/1KN5/8/1P6/k7/8/8 w - -
+Timezone UTC
+ECO D00
+ECOUrl https://www.chess.com/openings/Queens-Pawn-Opening-Accelerated-London-System-2...Bf5-3.e3
+UTCDate 2023.02.28
+UTCTime 16:35:45
+WhiteElo 1376
+BlackElo 1329
+TimeControl 600
+Termination Cheesecube01 won by resignation
+StartTime 16:35:45
+EndDate 2023.02.28
+EndTime 16:53:34
+Link https://www.chess.com/game/live/71341174073
