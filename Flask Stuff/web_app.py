@@ -9,7 +9,6 @@ Before running, set these environment variables:
 """
 
 import os
-import sys
 import oracledb
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
@@ -63,7 +62,6 @@ def init_session(connection, requestedTag_ignored):
 
 # start_pool(): starts the connection pool
 def start_pool():
-
     # Generally a fixed-size pool is recommended, i.e. pool_min=pool_max.
     # Here the pool contains 4 connections, which is fine for 4 conncurrent
     # users.
@@ -82,18 +80,20 @@ def start_pool():
           "ssl_server_dn_match=yes)))")
 
     pool = oracledb.SessionPool(user=os.getenv("USER"),
-                                 password=os.getenv("PASSWORD"),
-                                 dsn="(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)("
-							        "host=adb.us-ashburn-1.oraclecloud.com))(connect_data=("
-									"service_name=g83c4ff870b21c6_chessdatabase_high.adb.oraclecloud.com))(security=("
-									"ssl_server_dn_match=yes)))",
-                                 min=pool_min,
-                                 max=pool_max,
-                                 increment=pool_inc,
-                                 threaded=True,
-                                 getmode=pool_gmd,
-                                 sessionCallback=init_session)
-
+                                password=os.getenv("PASSWORD"),
+                                dsn="(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)("
+                                    "host=adb.us-ashburn-1.oraclecloud.com))(connect_data=("
+                                    "service_name=g83c4ff870b21c6_chessdatabase_high.adb.oraclecloud.com))(security=("
+                                    "ssl_server_dn_match=yes)))",
+                                config_dir="Oracle Wallet",
+                                wallet_location="Oracle Wallet",
+                                wallet_password=os.getenv("PASSWORD"),
+                                min=pool_min,
+                                max=pool_max,
+                                increment=pool_inc,
+                                threaded=True,
+                                getmode=pool_gmd,
+                                sessionCallback=init_session)
     return pool
 
 ################################################################################

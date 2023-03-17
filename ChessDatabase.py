@@ -43,7 +43,11 @@ def makeConnection():
         dsn="(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)("
             "host=adb.us-ashburn-1.oraclecloud.com))(connect_data=("
             "service_name=g83c4ff870b21c6_chessdatabase_high.adb.oraclecloud.com))(security=("
-            "ssl_server_dn_match=yes)))"
+            "ssl_server_dn_match=yes)))",
+
+        config_dir="Oracle Wallet",
+        wallet_location="Oracle Wallet",
+        wallet_password=os.getenv("PASSWORD")
     )
     print("connection established")
     return connection
@@ -83,7 +87,7 @@ if __name__ == '__main__':
     #os.environ["CONNECTION_STRING"] =
     # "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(""host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(""service_name=g83c4ff870b21c6_chessdatabase_high.adb.oraclecloud.com))(security=(""ssl_server_dn_match=yes)))"
 
-    #makeConnection()
+    makeConnection()
     #clearDatabase()
     #initializeDatabase()
 
