@@ -1,8 +1,6 @@
 from dahuffman import HuffmanCodec
 import ChessDatabase as ChessDB
 import ChessCom
-import pygame
-from pygame.locals import *
 
 if __name__ == '__main__':
     FebruaryGames = ChessCom.GameCollection()
@@ -29,25 +27,6 @@ if __name__ == '__main__':
         print()'''
 
 
-
-    # Pygame stuff
-
-    # resizable window
-    pygame.init()
-    screen = pygame.display.set_mode((500, 500), HWSURFACE | DOUBLEBUF | RESIZABLE)
-    pic = pygame.image.load("empty_board.png")
-    screen.blit(pygame.transform.scale(pic, (500, 500)), (0, 0))
-    pygame.display.flip()
-    while True:
-        pygame.event.pump()
-        event = pygame.event.wait()
-        if event.type == QUIT:
-            pygame.display.quit()
-        elif event.type == VIDEORESIZE:
-            screen = pygame.display.set_mode(
-                event.dict['size'], HWSURFACE | DOUBLEBUF | RESIZABLE)
-            screen.blit(pygame.transform.scale(pic, event.dict['size']), (0, 0))
-            pygame.display.flip()
 
 
 
