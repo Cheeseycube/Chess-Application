@@ -72,6 +72,7 @@ if __name__ == '__main__':
 
     engine.quit()'''
 
+
     # Use NAGS in chess analyzer
 
     # TO DO: make a separate chess engine class to handle all this

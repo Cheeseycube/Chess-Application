@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title></title>
+</head>
+
+<style>
+h1 {text-align: center;}
+.centerDiv {
+  text-align: center;
+}
+input[type="text"]{
+  font-size: 24px;
+}
+</style>
+
+<body>
+<h1>Create Your Account</h1>
+
+<form action="{{ url_for("create_account")}}" method="post">
+
+<div class="centerDiv">
+<label for="userName">User Name:</label>
+</div>
+
+<div class="centerDiv">
+<input type="text" id="userName" name="name" placeholder="type your user name here">
+</div>
+
+<div class="centerDiv">
+<button type="submit">Add</button>
+</div>
+
+</body>
+</html>

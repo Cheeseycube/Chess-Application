@@ -2,6 +2,7 @@ import os
 import oracledb
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
+import ChessDatabase as ChessDB
 
 # Start a connection pool.
 #
@@ -30,42 +31,6 @@ def init_session(connection, requestedTag_ignored):
         ALTER SESSION SET
           TIME_ZONE = 'UTC'
           NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI'""")
-
-# start_pool(): starts the connection pool
-def start_pool():
-    # Generally a fixed-size pool is recommended, i.e. pool_min=pool_max.
-    # Here the pool contains 4 connections, which is fine for 4 conncurrent
-    # users.
-    #
-    # The "get mode" is chosen so that if all connections are already in use, any
-    # subsequent acquire() will wait for one to become available.
-
-    pool_min = 4
-    pool_max = 4
-    pool_inc = 0
-    pool_gmd = oracledb.SPOOL_ATTRVAL_WAIT
-
-    print("Connecting to", "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)("
-          "host=adb.us-ashburn-1.oraclecloud.com))(connect_data=("
-          "service_name=g83c4ff870b21c6_chessdatabase_high.adb.oraclecloud.com))(security=("
-          "ssl_server_dn_match=yes)))")
-
-    _pool = oracledb.SessionPool(user=os.getenv("USER"),
-                                password=os.getenv("PASSWORD"),
-                                dsn="(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)("
-                                    "host=adb.us-ashburn-1.oraclecloud.com))(connect_data=("
-                                    "service_name=g83c4ff870b21c6_chessdatabase_high.adb.oraclecloud.com))(security=("
-                                    "ssl_server_dn_match=yes)))",
-                                config_dir="Oracle Wallet",
-                                wallet_location="Oracle Wallet",
-                                wallet_password=os.getenv("PASSWORD"),
-                                min=pool_min,
-                                max=pool_max,
-                                increment=pool_inc,
-                                threaded=True,
-                                getmode=pool_gmd,
-                                sessionCallback=init_session)
-    return _pool
 
 
 # Specify some routes
@@ -111,14 +76,14 @@ def show_username(id):
     r = cursor.fetchone()
     return (r[0] if r else "Unknown user id")
 
-@app.route('/add_user', methods = ["GET", "POST"])
-def add_user_page():
+@app.route('/create_account', methods = ["GET", "POST"])
+def create_account():
     if request.method == "POST":
         # getting input with name = fname in HTML form
         user_name = request.form.get("name")
         id_num = insertUser(user_name)
         return f"Added {user_name} to the database with an ID number of: {id_num}"
-    return render_template('add_view.html')
+    return render_template('create_account_view.html')
 
 
 ################################################################################
@@ -130,7 +95,7 @@ if __name__ == '__main__':
     load_dotenv()
 
     # Start a pool of connections
-    pool = start_pool()
+    #pool = ChessDB.makeConnectionPool()
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))
