@@ -81,7 +81,10 @@ def create_account():
     if request.method == "POST":
         # getting input with name = fname in HTML form
         user_name = request.form.get("name")
-        id_num = insertUser(user_name)
+        password = request.form.get("password")
+        id_num = ChessDB.addUser(user_name, password)
+        if id_num == -1:
+            return f"Could not add {user_name} to the database"
         return f"Added {user_name} to the database with an ID number of: {id_num}"
     return render_template('create_account_view.html')
 
@@ -95,7 +98,7 @@ if __name__ == '__main__':
     load_dotenv()
 
     # Start a pool of connections
-    #pool = ChessDB.makeConnectionPool()
+    pool = ChessDB.makeConnectionPool(4)
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))
