@@ -84,7 +84,7 @@ if __name__ == '__main__':
     load_dotenv()
 
     # Start a pool of connections
-    #pool = ChessDB.makeConnectionPool(4)
+    pool = ChessDB.makeConnectionPool(4)
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))
