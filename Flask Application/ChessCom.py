@@ -30,6 +30,7 @@ class GameCollection:
         self.month_pgns_string = ""
         self.month_games = []
 
+    # returns a list of pgns, and sets the other private fields
     def get_month_games(self, user, year, month):
         # Getting all games for a month
         month_games = get_player_games_by_month_pgn(user, year, month)
@@ -71,8 +72,7 @@ class GameCollection:
                      game_dict["BlackElo"], game_dict["Result"], game_dict["Termination"],
                      game_dict["TimeControl"], game_dict["StartTime"],
                      game_dict["EndTime"], game_dict["Link"], pgn))
-            #print(f"game {game_counter} date: {game_dict['Date']}")
+            # print(f"game {game_counter} date: {game_dict['Date']}")
             # ChessDB.addGame('2023-02-27', 'Joseph', huffEncode(big_pgn_string, pgn))
 
         return self.month_games
-

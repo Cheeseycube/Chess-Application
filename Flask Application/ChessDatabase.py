@@ -45,9 +45,8 @@ def addGame(given_date, given_userName, given_platform, given_pgn):
     print("connection closed")
 
 
-# Uses the private field "pool" as defined by makeConnectionPool
+# Uses the global field "pool" as defined by makeConnectionPool
 def addUser(userName, password):
-
     # checking for valid inputs
     if userName is None:
         print("cannot insert null userName")
@@ -79,7 +78,8 @@ def addUser(userName, password):
             return -1
 
     # Is the password (post-hashing) available?
-    matches = cursor.execute("select 1 from Users where userPassword = :userPassword_bv", userPassword_bv=password_hashed)
+    matches = cursor.execute("select 1 from Users where userPassword = :userPassword_bv",
+                             userPassword_bv=password_hashed)
     for row in matches:
         if row[0] is not None:
             print("The provided password has already been taken, please provide another one")
@@ -103,13 +103,34 @@ def addUser(userName, password):
     return id_num.getvalue()[0]
 
 
-def getUsers():
-    connection = makeConnection()
-    cursor = connection.cursor()  # defining cursor for later use
+def check_credentials(userName, password):
+    global pool
+    if pool is None:
+        print("Connection pool was null, aborting verify password operation")
+        return -1
+    connection = pool.acquire()
+    cursor = connection.cursor()
 
-    for row in cursor.execute('select userName from Users'):
-        return row[0]
-    connection.commit()
+    cursor.execute("select * from Users where userName = :userName_bv", userName_bv=userName)
+    columns = [col[0] for col in cursor.description]
+    cursor.rowfactory = lambda *args: dict(zip(columns, args))
+    data = cursor.fetchone()
+    if data is None:
+        print("invalid username")
+        connection.commit()
+        return False
+    else:
+        original_password_hashed = data['USERPASSWORD']
+        given_password = bytes(password, 'utf-8')
+        given_password_hashed = bcrypt.hashpw(given_password, data['HASHSALT'])
+        if original_password_hashed == given_password_hashed:
+            connection.commit()
+            return True
+        else:
+            print("invalid password")
+            connection.commit()
+            return False
+
 
 # returns a single connection to the database: mainly used for testing
 def makeConnection():
@@ -152,6 +173,7 @@ def makeConnectionPool(pool_size):
                                  getmode=pool_gmd)
     global pool
     pool = _pool
+    print("connection pool established")
 
 
 def clearDatabase():
@@ -183,14 +205,53 @@ def getGames():
         return row[0]
 
 
+def old_getUsers():
+    connection = makeConnection()
+    cursor = connection.cursor()  # defining cursor for later use
+
+    for row in cursor.execute('select userName from Users'):
+        return row[0]
+    connection.commit()
+
+
+# returns some kind of list of all users
+def get_allUsers():
+    connection = makeConnection()
+    cursor = connection.cursor()
+    res = []
+    for row in cursor.execute("select userName from Users"):
+        res.append(row[0])
+    return res
+
+
+# returns a user dict or None if the user is not found
+def getUser(user_name):
+    # setting up the connection
+    global pool
+    if pool is None:
+        print("Connection pool was null, aborting addUser operation")
+        return -1
+    connection = pool.acquire()
+    cursor = connection.cursor()
+    cursor.execute("select * from Users where USERNAME = :name_bv", [user_name])
+    columns = [col[0] for col in cursor.description]
+    cursor.rowfactory = lambda *args: dict(zip(columns, args))
+    data = cursor.fetchone()
+    connection.commit()
+    return data
+
+
 if __name__ == '__main__':
     load_dotenv()
     print("welcome")
     #clearDatabase()
     #initializeDatabase()
 
-    #makeConnectionPool(4)
-    #print(addUser('Gina', 'dkfjsdkfj'))
+    # print(get_allUsers())
+    # makeConnection()
+    # makeConnectionPool(4)
+
+    # print(addUser('Gina', 'dkfjsdkfj'))
 
     '''password = 'dsjfdskjfsdkjflkdsjfkl'
     print(len(password))

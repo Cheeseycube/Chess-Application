@@ -1,33 +1,20 @@
 import os
+
+import flask
+import flask_login
 import oracledb
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, flash
 from dotenv import load_dotenv
 import ChessDatabase as ChessDB
+from flask_login import LoginManager
+
 
 # log in tutorials:
 # https://flask-login.readthedocs.io/en/latest/
 # https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
-# Start a connection pool.
-#
-# Connection pools allow multiple, concurrent web requests to be efficiently
-# handled.  The alternative would be to open a new connection for each use
-# which would be very slow, inefficient, and not scalable.  Connection pools
-# support Oracle high availability features.
-#
-# Doc link: https://cx-oracle.readthedocs.io/en/latest/user_guide/connection_handling.html#connection-pooling
 
+# CX_oracle docs cover basically everything: https://cx-oracle.readthedocs.io/en/latest/
 
-# init_session(): a 'session callback' to efficiently set any initial state
-# that each connection should have.
-#
-# If you have multiple SQL statements, then them all in a PL/SQL anonymous
-# block with BEGIN/END so you only call execute() once.  This is shown later in
-# create_schema().
-#
-# This particular demo doesn't use dates, so sessionCallback could be omitted,
-# but it does show settings many apps would use.
-# Doc link: https://cx-oracle.readthedocs.io/en/latest/user_guide/connection_handling.html#session-callbacks-for-setting-pooled-connection-state
-#
 def init_session(connection, requestedTag_ignored):
     cursor = connection.cursor()
     cursor.execute("""
@@ -41,25 +28,54 @@ def init_session(connection, requestedTag_ignored):
 # The default route will display a welcome message:
 #   http://127.0.0.1:8080/
 
-app = Flask(__name__)
 
-# Display a welcome message on the 'home' page
+app = Flask(__name__)
+app.secret_key = 'secret-string'
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Our mock database.
+users = []
+
+
+class User(flask_login.UserMixin):
+    pass
+
+
+@login_manager.user_loader
+def user_loader(user_name):
+    userData = ChessDB.getUser(user_name)
+    if userData is None:
+        return
+    user = User()
+    user.id = userData['USERID']
+    user.name = userData['USERNAME']
+    return user
+
+
+@login_manager.request_loader
+def request_loader(request):
+    userName = request.form.get('name')
+    userData = ChessDB.getUser(userName)
+    if userData is None:
+        return
+    user = User()
+    user.id = userData['USERID']
+    user.name = userData['USERNAME']
+    return user
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return 'Unauthorized', 401
+
+
+# This is the home page
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Show the username for a given id
-@app.route('/user/<int:id>')
-def show_username(id):
-    global pool
-    connection = pool.acquire()
-    cursor = connection.cursor()
-    cursor.execute("select userName from Users where userId = :id_bv", [id])
-    # fetching the first row from the previously executed query
-    r = cursor.fetchone()
-    return (r[0] if r else "Unknown user id")
 
-@app.route('/create_account', methods = ["GET", "POST"])
+@app.route('/create_account', methods=["GET", "POST"])
 def create_account():
     if request.method == "POST":
         # getting input with name = fname in HTML form
@@ -71,9 +87,37 @@ def create_account():
         return f"Added {user_name} to the database with an ID number of: {id_num}"
     return render_template('create_account_view.html')
 
-@app.route('/login', methods = ["GET", "POST"])
+
+@app.route('/login', methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        user_name = request.form.get("name")
+        password = request.form.get("password")
+
+        # checking credentials
+        if ChessDB.check_credentials(user_name, password):
+            user = User()
+            user.id = user_name
+            flask_login.login_user(user)
+            return flask.redirect(flask.url_for('view_profile'))
+        else:
+            flash('Invalid username and/or password')
+            return render_template('login_view.html')
     return render_template('login_view.html')
+
+
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return 'Logged out'
+
+
+@app.route('/profile')
+@flask_login.login_required
+def view_profile():
+    return render_template('profile_view.html', name=flask_login.current_user.name, id_num=flask_login.current_user.id)
+    #return 'Logged in as: ' + flask_login.current_user.id
+
 
 ################################################################################
 #
@@ -85,6 +129,9 @@ if __name__ == '__main__':
 
     # Start a pool of connections
     pool = ChessDB.makeConnectionPool(4)
+
+    # get all users
+    #users = ChessDB.get_allUsers()
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))
