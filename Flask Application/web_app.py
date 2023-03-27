@@ -81,10 +81,13 @@ def create_account():
         # getting input with name = fname in HTML form
         user_name = request.form.get("name")
         password = request.form.get("password")
-        id_num = ChessDB.addUser(user_name, password)
-        if id_num == -1:
-            return f"Could not add {user_name} to the database"
-        return f"Added {user_name} to the database with an ID number of: {id_num}"
+        res = ChessDB.addUser(user_name, password)
+        if res[0] == -1:
+            flash(res[1], 'error')
+            return render_template('create_account_view.html')
+        else:
+            flash(res[1])
+            return flask.redirect(flask.url_for('login'))
     return render_template('create_account_view.html')
 
 
@@ -95,13 +98,14 @@ def login():
         password = request.form.get("password")
 
         # checking credentials
-        if ChessDB.check_credentials(user_name, password):
+        check_results = ChessDB.check_credentials(user_name, password)
+        if check_results[0]:
             user = User()
             user.id = user_name
             flask_login.login_user(user)
             return flask.redirect(flask.url_for('view_profile'))
         else:
-            flash('Invalid username and/or password')
+            flash(check_results[1], 'error')
             return render_template('login_view.html')
     return render_template('login_view.html')
 
@@ -109,14 +113,13 @@ def login():
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
+    return flask.redirect(flask.url_for('index'))
 
 
 @app.route('/profile')
 @flask_login.login_required
 def view_profile():
     return render_template('profile_view.html', name=flask_login.current_user.name, id_num=flask_login.current_user.id)
-    #return 'Logged in as: ' + flask_login.current_user.id
 
 
 ################################################################################

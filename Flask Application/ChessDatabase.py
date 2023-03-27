@@ -75,7 +75,7 @@ def addUser(userName, password):
         if row[0] is not None:
             print("The provided username has already been taken, please provide another one")
             connection.commit()
-            return -1
+            return -1, "The provided username has already been taken, please provide another one"
 
     # Is the password (post-hashing) available?
     matches = cursor.execute("select 1 from Users where userPassword = :userPassword_bv",
@@ -84,7 +84,7 @@ def addUser(userName, password):
         if row[0] is not None:
             print("The provided password has already been taken, please provide another one")
             connection.commit()
-            return -1
+            return -1, "The provided password has already been taken, please provide another one"
 
     # inserting into the database
     sql_statement = ("insert into Users (userName, userPassword, hashSalt)"
@@ -95,12 +95,12 @@ def addUser(userName, password):
     except oracledb.IntegrityError:
         print("Your password or username is already in use, aborting add operation.")
         connection.commit()
-        return -1
+        return -1, "Your password or username is already in use, aborting add operation."
 
     print(f"Successfully added {userName} to the database with an id of {id_num.getvalue()[0]}")
     connection.commit()
     # returning the new user's id number
-    return id_num.getvalue()[0]
+    return id_num.getvalue()[0], f"Successfully added {userName} to the database with an id of {id_num.getvalue()[0]}"
 
 
 def check_credentials(userName, password):
@@ -118,18 +118,18 @@ def check_credentials(userName, password):
     if data is None:
         print("invalid username")
         connection.commit()
-        return False
+        return (False, 'invalid username')
     else:
         original_password_hashed = data['USERPASSWORD']
         given_password = bytes(password, 'utf-8')
         given_password_hashed = bcrypt.hashpw(given_password, data['HASHSALT'])
         if original_password_hashed == given_password_hashed:
             connection.commit()
-            return True
+            return (True, None)
         else:
             print("invalid password")
             connection.commit()
-            return False
+            return (False, 'invalid password')
 
 
 # returns a single connection to the database: mainly used for testing
