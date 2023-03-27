@@ -30,7 +30,7 @@ class GameCollection:
         self.month_pgns_string = ""
         self.month_games = []
 
-    # returns a list of pgns, and sets the other private fields
+    # returns a list of games, and sets the other private fields
     def get_month_games(self, user, year, month):
         # Getting all games for a month
         month_games = get_player_games_by_month_pgn(user, year, month)

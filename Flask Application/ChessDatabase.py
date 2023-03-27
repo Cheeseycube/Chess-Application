@@ -29,16 +29,16 @@ import bcrypt
 pool = None
 
 
-def addGame(given_date, given_userName, given_platform, given_pgn):
+def addGame(given_date, given_userID, given_platform, given_pgn):
     connection = makeConnection()
     cursor = connection.cursor()  # defining cursor for later use
 
     # use "INSERT IGNORE" to avoid inserting duplicates
 
     # insert into Games table
-    sql_statement = ("insert into Games (datePlayed, userName, platform, pgn) "
-                     "values(TO_DATE(:newdate, 'YYYY-MM-DD'), :newplatform, :newuser, :newpgn)")
-    cursor.execute(sql_statement, [given_date, given_userName, given_platform, given_pgn])
+    sql_statement = ("insert into Games (USERID, datePlayed, platform, pgn)"
+                     "values(TO_DATE(:newdate, 'YYYY-MM-DD'), :newplatform, :user_id, :newpgn)")
+    cursor.execute(sql_statement, [given_userID, given_date, given_platform, given_pgn])
     print(cursor.rowcount, "row inserted")
 
     connection.commit()  # close the connection
