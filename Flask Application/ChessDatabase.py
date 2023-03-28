@@ -2,6 +2,7 @@ import oracledb
 import os
 from dotenv import load_dotenv
 import bcrypt
+from dahuffman import HuffmanCodec
 
 # If using oracle (locally hosted database): https://www.oracle.com/database/technologies/appdev/python/quickstartpythononprem.html
 
@@ -45,6 +46,51 @@ def addGame(given_date, given_userID, given_platform, given_pgn):
     print("connection closed")
 
 
+def add_multiple_Games(Games, userID, platform):
+    # setting up the connection
+    global pool
+    if pool is None:
+        print("Connection pool was null, aborting add_multiple_Games operation")
+        return -1
+    connection = pool.acquire()
+    cursor = connection.cursor()
+
+    # training the huffman encoder
+    training_file = open('training_data.txt', 'r')
+    training_data = training_file.read()
+    codec = HuffmanCodec.from_data(training_data)
+
+    for game in Games.games:
+        date = game.date.replace(".", "-")
+        sql_statement = ("insert into Games(USERID, DATEPLAYED, PLATFORM, PGN)"
+                         "values(:id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :pgn_bv)")
+        cursor.execute(sql_statement, [userID, date, platform, codec.encode(game.pgn)])
+    connection.commit()
+
+def get_games_by_date(userID, date):
+    # setting up the connection
+    global pool
+    if pool is None:
+        print("Connection pool was null, aborting add_multiple_Games operation")
+        return -1
+    connection = pool.acquire()
+    cursor = connection.cursor()
+
+    sql_statement = ("select * from Games where DATEPLAYED = TO_DATE(:date_bv, 'YYYY-MM-DD') and USERID = :id_bv")
+    cursor.execute(sql_statement, [date, userID])
+    columns = [col[0] for col in cursor.description]
+    cursor.rowfactory = lambda *args: dict(zip(columns, args))
+    data = cursor.fetchone()
+    if data is None:
+        return "no games found"
+
+    # training the huffman encoder
+    training_file = open('training_data.txt', 'r')
+    training_data = training_file.read()
+    codec = HuffmanCodec.from_data(training_data)
+    return codec.decode(data["PGN"])
+
+
 # Uses the global field "pool" as defined by makeConnectionPool
 def addUser(userName, password):
     # checking for valid inputs
@@ -55,6 +101,11 @@ def addUser(userName, password):
         print("cannot insert null password")
         return -1
 
+    if (len(userName) < 1):
+        return -1, "Username must be at least one character"
+    if (len(password) < 7):
+        return -1, "Password must be at least 7 characters"
+
     # setting up the connection
     global pool
     if pool is None:
@@ -63,6 +114,7 @@ def addUser(userName, password):
     connection = pool.acquire()
     cursor = connection.cursor()
     id_num = cursor.var(int)
+
 
     # hashing the password
     password = bytes(password, 'utf-8')
@@ -244,8 +296,8 @@ def getUser(user_name):
 if __name__ == '__main__':
     load_dotenv()
     print("welcome")
-    #clearDatabase()
-    #initializeDatabase()
+    # clearDatabase()
+    # initializeDatabase()
 
     # print(get_allUsers())
     # makeConnection()

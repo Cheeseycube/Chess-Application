@@ -7,7 +7,7 @@ if __name__ == '__main__':
     FebruaryGames.get_month_games("Cheesecube01", "2023", "02")
 
     # training the huffman encoder
-    training_data = FebruaryGames.month_pgns_string
+    training_data = FebruaryGames.pgns_string
     codec = HuffmanCodec.from_data(training_data)
     # getting a single pgn from the database and decrypting it
     encodedPGN = ChessDB.getGames()

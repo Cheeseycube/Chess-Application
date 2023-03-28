@@ -26,11 +26,11 @@ class Game:
 # Defining a Chess.com collection object
 class GameCollection:
     def __init__(self):
-        self.month_pgns = []
-        self.month_pgns_string = ""
-        self.month_games = []
+        self.pgns = []
+        self.pgns_string = ""
+        self.games = []
 
-    # returns a list of games, and sets the other private fields
+    # returns a list of games, and sets the   private fields
     def get_month_games(self, user, year, month):
         # Getting all games for a month
         month_games = get_player_games_by_month_pgn(user, year, month)
@@ -65,9 +65,9 @@ class GameCollection:
                 game_dict[command] = description.strip()
 
             # adding the game and pgn to various collections
-            self.month_pgns.append(pgn)
-            self.month_pgns_string += pgn
-            self.month_games.append(
+            self.pgns.append(pgn)
+            self.pgns_string += pgn
+            self.games.append(
                 Game(game_dict["Date"], game_dict["White"], game_dict["Black"], game_dict["WhiteElo"],
                      game_dict["BlackElo"], game_dict["Result"], game_dict["Termination"],
                      game_dict["TimeControl"], game_dict["StartTime"],
@@ -75,4 +75,5 @@ class GameCollection:
             # print(f"game {game_counter} date: {game_dict['Date']}")
             # ChessDB.addGame('2023-02-27', 'Joseph', huffEncode(big_pgn_string, pgn))
 
-        return self.month_games
+        return self.games
+

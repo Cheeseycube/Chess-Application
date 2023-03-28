@@ -1,5 +1,7 @@
 from dahuffman import HuffmanCodec
 import ChessCom
+import ChessDatabase as ChessDB
+from dotenv import load_dotenv
 
 # python chess library: https://pypi.org/project/python-chess/
 # python stockfish library: https://pypi.org/project/stockfish/
@@ -20,29 +22,38 @@ import ChessCom
 
 if __name__ == '__main__':
 
+    load_dotenv()
+
     FebruaryGames = ChessCom.GameCollection()
     FebruaryGames.get_month_games("Cheesecube01", "2023", "02")
 
     # training the huffman encoder
-    training_data = FebruaryGames.month_pgns_string
+    training_data = FebruaryGames.pgns_string
     codec = HuffmanCodec.from_data(training_data)
+    print(type(codec))
 
     # finding the longest pgn and encoding it
     largest_pgn = ""
-    for pgn in FebruaryGames.month_pgns:
+    for pgn in FebruaryGames.pgns:
         if (len(largest_pgn) < len(pgn)):
             largest_pgn = pgn
     encodedPgn = codec.encode(largest_pgn)
 
+    ChessDB.makeConnectionPool(4)
+    #ChessDB.add_multiple_Games(FebruaryGames, 1, 'Chess.com')
+    print(ChessDB.get_games_by_date(1, "2023-02-24"))
 
-    # adding to the database
+
+
+
+    ''''# adding to the database
     i = 0
     for game in FebruaryGames.month_games:
         i += 1
         if (i > 20):
             break
         print(f"Adding a pgn with length in bytes: {len(codec.encode(game.pgn))}")
-        #ChessDB.addGame(game.date.replace(".", "-"), "Joseph", "Chess.com", codec.encode(game.pgn))
+        #ChessDB.addGame(game.date.replace(".", "-"), "Joseph", "Chess.com", codec.encode(game.pgn))'''
 
     # getting a single pgn from the database and decrypting it
     '''encodedPGN = ChessDB.getGames()

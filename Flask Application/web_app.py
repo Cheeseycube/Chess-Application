@@ -119,7 +119,8 @@ def logout():
 @app.route('/profile')
 @flask_login.login_required
 def view_profile():
-    return render_template('profile_view.html', name=flask_login.current_user.name, id_num=flask_login.current_user.id)
+    return render_template('profile_view.html', name=flask_login.current_user.name, id_num=flask_login.current_user.id,
+                           pgn=ChessDB.get_games_by_date(flask_login.current_user.id, "2023-02-24"))
 
 
 ################################################################################
@@ -132,9 +133,6 @@ if __name__ == '__main__':
 
     # Start a pool of connections
     pool = ChessDB.makeConnectionPool(4)
-
-    # get all users
-    #users = ChessDB.get_allUsers()
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))
