@@ -116,11 +116,13 @@ def logout():
     return flask.redirect(flask.url_for('index'))
 
 
+# show the 5 most recent games perhaps
 @app.route('/profile')
 @flask_login.login_required
 def view_profile():
     return render_template('profile_view.html', name=flask_login.current_user.name, id_num=flask_login.current_user.id,
-                           pgn=ChessDB.get_games_by_date(flask_login.current_user.id, "2023-02-24"))
+                           pgn=ChessDB.get_games_by_date(flask_login.current_user.id, "2023-02-24"),
+                           white='Cheesecube01', black='RandomNoob')
 
 
 ################################################################################

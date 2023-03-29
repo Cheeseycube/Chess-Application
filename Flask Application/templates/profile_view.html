@@ -8,10 +8,18 @@
 <style>
 h1 {text-align: center;}
 p {text-align: center;}
+.centerDiv {
+  text-align: center;
+  font-size: 24px;
+}
 </style>
 
 <body>
 <h1>Logged in as {{name}} with an ID of {{id_num}}</h1>
+<h1>Below are your five most recent games</h1>
+
+<p><a href="FIXME"><button class=grey style="height:75px;width:150px;font-size: medium">{{white}} vs {{black}}</button></a></p>
+
 <p><a href="logout"><button class=grey style="height:75px;width:150px;font-size: large">Log Out</button></a></p>
 <p>{{pgn}}</p>
 </body>
