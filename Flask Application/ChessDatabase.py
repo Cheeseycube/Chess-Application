@@ -17,7 +17,7 @@ from dahuffman import HuffmanCodec
             userID int            # Foreign Key
             datePlayed date
             platform varchar(20)  # chess.com, lichess, otb, etc...
-            pgn raw(3000)         # this is the oracle equivalent of varbinary(3000)
+            pgn raw(3000) UNIQUE  # raw is the Oracle equivalent of varbinary
             white varchar(50)
             black varchar(50)
             white_elo number(4)
@@ -254,7 +254,7 @@ def initializeDatabase():
     UNIQUE, userPassword raw(70) UNIQUE, hashSalt raw(40), PRIMARY KEY (userID))""")
     cursor.execute("""
     create table Games(userID int, FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE, 
-    datePlayed date, platform varchar(20), pgn raw(3000), white varchar(50), black varchar(50),
+    datePlayed date, platform varchar(20), pgn raw(3000) UNIQUE , white varchar(50), black varchar(50),
     white_elo number(4), black_elo number(4), game_result varchar(5), termination varchar(70),
     time_control number(4), link varchar(60))""")
     connection.commit()
@@ -308,8 +308,8 @@ def getUser(user_name):
 if __name__ == '__main__':
     load_dotenv()
     print("welcome")
-    # clearDatabase()
-    # initializeDatabase()
+    #clearDatabase()
+    #initializeDatabase()
 
     # print(get_allUsers())
     # makeConnection()

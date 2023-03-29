@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+ <title></title>
+</head>
+
+<style>
+h1 {text-align: center;}
+p {text-align: center;}
+.centerDiv {
+  text-align: center;
+  font-size: 24px;
+}
+button[type="submit"]{
+  font-size: 24px;
+}
+</style>
+
+<body>
+<h1>Please provide the following information in order to automatically pull games from Chess.com</h1>
+
+<form method="post" action="/addGames">
+<div class="centerDiv">
+<label for="month">Choose a month:</label>
+<select name="month" id="month" style="font-size: 18px; width: 200px; text-align: center;">
+  <option value="january">January</option>
+  <option value="february">February</option>
+  <option value="march">March</option>
+  <option value="april">April</option>
+  <option value="may">May</option>
+  <option value="june">June</option>
+  <option value="july">July</option>
+  <option value="august">August</option>
+  <option value="september">September</option>
+  <option value="october">October</option>
+  <option value="november">November</option>
+  <option value="december">December</option>
+</select>
+</div>
+
+<div class="centerDiv">
+ <button type="submit">Submit</button>
+</div>
+</form>
+
+</body>
+</html>

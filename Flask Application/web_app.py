@@ -120,9 +120,15 @@ def logout():
 @app.route('/profile')
 @flask_login.login_required
 def view_profile():
-    return render_template('profile_view.html', name=flask_login.current_user.name, id_num=flask_login.current_user.id,
-                           pgn=ChessDB.get_games_by_date(flask_login.current_user.id, "2023-02-24"),
-                           white='Cheesecube01', black='RandomNoob')
+    return render_template('profile_view.html', name=flask_login.current_user.name)
+
+@app.route('/addGames',  methods=["GET", "POST"])
+@flask_login.login_required
+def addGames():
+    if request.method == "POST":
+        return request.form.get("month")
+    #pgn = ChessDB.get_games_by_date(flask_login.current_user.id)
+    return render_template('addGames_view.html')
 
 
 ################################################################################
