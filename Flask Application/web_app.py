@@ -6,6 +6,7 @@ import oracledb
 from flask import Flask, render_template, request, flash
 from dotenv import load_dotenv
 import ChessDatabase as ChessDB
+import ChessCom
 from flask_login import LoginManager
 
 
@@ -126,9 +127,17 @@ def view_profile():
 @flask_login.login_required
 def addGames():
     if request.method == "POST":
-        return request.form.get("month")
+        gameCol = ChessCom.GameCollection()
+        gameCol.get_month_games(request.form.get("userName"), request.form.get("year"), request.form.get("month"))
+        ChessDB.add_multiple_Games(gameCol, flask_login.current_user.id, 'Chess.com')
+        return flask.redirect(flask.url_for('viewGames'))
     #pgn = ChessDB.get_games_by_date(flask_login.current_user.id)
     return render_template('addGames_view.html')
+
+@app.route('/viewGames')
+@flask_login.login_required
+def viewGames():
+    return render_template('games_view.html', pgn=ChessDB.get_most_recent_game(flask_login.current_user.id))
 
 
 ################################################################################
