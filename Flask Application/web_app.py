@@ -129,7 +129,9 @@ def addGames():
     if request.method == "POST":
         gameCol = ChessCom.GameCollection()
         gameCol.get_month_games(request.form.get("userName"), request.form.get("year"), request.form.get("month"))
+        # display loading spinner here
         ChessDB.add_multiple_Games(gameCol, flask_login.current_user.id, 'Chess.com')
+        # end loading spinner
         return flask.redirect(flask.url_for('viewGames'))
     #pgn = ChessDB.get_games_by_date(flask_login.current_user.id)
     return render_template('addGames_view.html')

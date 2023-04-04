@@ -262,6 +262,8 @@ def addUser(userName, password):
         return -1, "Username must be at least one character"
     if (len(password) < 7):
         return -1, "Password must be at least 7 characters"
+    if (len(userName) > 40):
+        return -1, "Username must be be between 1 and 40 characters"
 
     # setting up the connection
     global pool
