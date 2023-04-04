@@ -126,15 +126,25 @@ def view_profile():
 @app.route('/addGames',  methods=["GET", "POST"])
 @flask_login.login_required
 def addGames():
-
-    if (request.form.get('loading')):
+    global loading
+    print('add games is called')
+    if loading:
+        print("add games tasks are executing")
         gameCol = ChessCom.GameCollection()
         gameCol.get_month_games(request.form.get("userName"), request.form.get("year"), request.form.get("month"))
         ChessDB.add_multiple_Games(gameCol, flask_login.current_user.id, 'Chess.com')
+        loading = False
+        flash('not_loading', 'loading')
         return flask.redirect(flask.url_for('viewGames'))
-    if request.method == "POST":
-        return render_template('addGames_view.html', loading=True)
-    return render_template('addGames_view.html', loading=False)
+    if request.method == "POST": #and not request.form.get('is_loading'):
+        print("returning loading view")
+        loading = True
+        flash('is_loading', 'loading')
+        return render_template('addGames_view.html')
+    loading = False
+    flash('not_loading', 'loading')
+    return render_template('addGames_view.html')
+
 
 @app.route('/viewGames')
 @flask_login.login_required
@@ -152,6 +162,9 @@ if __name__ == '__main__':
 
     # Start a pool of connections
     pool = ChessDB.makeConnectionPool(4)
+
+    # global loading bool
+    loading = False
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))

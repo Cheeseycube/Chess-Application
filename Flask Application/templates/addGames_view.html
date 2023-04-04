@@ -38,9 +38,11 @@ input[type="text"]{
 
 
 
-{% if loading %}
-  <div class="loader"></div>
-{% endif %}
+{% with messages = get_flashed_messages(category_filter=["loading"]) %}
+  {% if messages and messages[0] == 'is_loading' %}
+    <div class="loader"></div>
+  {% endif %}
+{% endwith %}
 
 <body>
 <div class="small_heading">
@@ -84,8 +86,6 @@ input[type="text"]{
   <option value="2023">2023</option>
 </select>
 </div>
-
-
 
 
 <div class="centerDiv">
