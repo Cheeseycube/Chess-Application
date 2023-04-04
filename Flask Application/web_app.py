@@ -3,7 +3,7 @@ import os
 import flask
 import flask_login
 import oracledb
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, session
 from dotenv import load_dotenv
 import ChessDatabase as ChessDB
 import ChessCom
@@ -126,15 +126,15 @@ def view_profile():
 @app.route('/addGames',  methods=["GET", "POST"])
 @flask_login.login_required
 def addGames():
-    if request.method == "POST":
+
+    if (request.form.get('loading')):
         gameCol = ChessCom.GameCollection()
         gameCol.get_month_games(request.form.get("userName"), request.form.get("year"), request.form.get("month"))
-        # display loading spinner here
         ChessDB.add_multiple_Games(gameCol, flask_login.current_user.id, 'Chess.com')
-        # end loading spinner
         return flask.redirect(flask.url_for('viewGames'))
-    #pgn = ChessDB.get_games_by_date(flask_login.current_user.id)
-    return render_template('addGames_view.html')
+    if request.method == "POST":
+        return render_template('addGames_view.html', loading=True)
+    return render_template('addGames_view.html', loading=False)
 
 @app.route('/viewGames')
 @flask_login.login_required

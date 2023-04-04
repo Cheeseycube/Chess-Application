@@ -258,12 +258,10 @@ def addUser(userName, password):
         print("cannot insert null password")
         return -1
 
-    if (len(userName) < 1):
-        return -1, "Username must be at least one character"
-    if (len(password) < 7):
-        return -1, "Password must be at least 7 characters"
-    if (len(userName) > 40):
-        return -1, "Username must be be between 1 and 40 characters"
+    if (len(userName) < 1 or len(userName) > 45):
+        return -1, "Username must be between 1 and 45 characters"
+    if (len(password) < 7 or len(password) > 65):
+        return -1, "Password must be between 7 and 65 characters"
 
     # setting up the connection
     global pool
