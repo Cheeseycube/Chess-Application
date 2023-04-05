@@ -1,7 +1,8 @@
 import os
-
+import sys
 import flask
 import flask_login
+import random
 import oracledb
 from flask import Flask, render_template, request, flash, session
 from dotenv import load_dotenv
@@ -150,6 +151,7 @@ def addGames():
 @flask_login.login_required
 def viewGames():
     return render_template('games_view.html', pgn=ChessDB.get_most_recent_game(flask_login.current_user.id))
+
 
 
 ################################################################################
