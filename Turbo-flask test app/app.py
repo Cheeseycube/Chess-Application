@@ -3,7 +3,6 @@ import re
 import sys
 from flask import Flask, render_template, request
 import threading
-import time
 import os
 from turbo_flask import Turbo
 
@@ -18,7 +17,7 @@ def index():
         #update_load()
         with app.app_context():
             turbo.push(turbo.replace(render_template('loadavg.html'), 'num'))
-        return render_template('index.html')
+        #return render_template('index.html')
     return render_template('index.html')
 
 

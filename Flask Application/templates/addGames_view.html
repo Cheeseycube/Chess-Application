@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  {{ turbo() }}
  <title></title>
 </head>
 
@@ -36,13 +37,7 @@ input[type="text"]{
   }
 </style>
 
-
-
-{% with messages = get_flashed_messages(category_filter=["loading"]) %}
-  {% if messages and messages[0] == 'is_loading' %}
-    <div class="loader"></div>
-  {% endif %}
-{% endwith %}
+{% include "loading_spinner.html" %}
 
 <body>
 <div class="small_heading">
@@ -56,7 +51,7 @@ input[type="text"]{
   <option value="01">January</option>
   <option value="02">February</option>
   <option value="03">March</option>
-  <option value="04">April</option>
+  <option value="04" selected>April</option>
   <option value="05">May</option>
   <option value="06">June</option>
   <option value="07">July</option>
@@ -83,7 +78,7 @@ input[type="text"]{
   <option value="2020">2020</option>
   <option value="2021">2021</option>
   <option value="2022">2022</option>
-  <option value="2023">2023</option>
+  <option value="2023" selected>2023</option>
 </select>
 </div>
 

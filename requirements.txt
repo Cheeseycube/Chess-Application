@@ -4,3 +4,4 @@ dahuffman~=0.4.1
 flask~=2.2.3
 python-dotenv~=1.0.0
 bcrypt
+turbo-flask

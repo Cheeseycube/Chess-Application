@@ -1,14 +1,12 @@
 import os
-import sys
 import flask
 import flask_login
-import random
-import oracledb
 from flask import Flask, render_template, request, flash, session
 from dotenv import load_dotenv
 import ChessDatabase as ChessDB
 import ChessCom
 from flask_login import LoginManager
+from turbo_flask import Turbo
 
 
 # log in tutorials:
@@ -32,6 +30,7 @@ def init_session(connection, requestedTag_ignored):
 
 
 app = Flask(__name__)
+turbo = Turbo(app)
 app.secret_key = 'secret-string'
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -70,6 +69,12 @@ def request_loader(request):
 def unauthorized_handler():
     return 'Unauthorized', 401
 
+@app.context_processor
+def inject_load():
+    global isLoading
+    isLoading = not isLoading
+    print(isLoading)
+    return {'loading': isLoading}
 
 # This is the home page
 @app.route('/')
@@ -127,23 +132,19 @@ def view_profile():
 @app.route('/addGames',  methods=["GET", "POST"])
 @flask_login.login_required
 def addGames():
-    global loading
-    print('add games is called')
-    if loading:
+    global isLoading
+    if request.method == "POST":
+        # display loading spinner
+        with app.app_context():
+            turbo.push(turbo.replace(render_template('loading_spinner.html'), 'loading'))
+        print(isLoading)
+        isLoading = False
+        # add games
         print("add games tasks are executing")
         gameCol = ChessCom.GameCollection()
         gameCol.get_month_games(request.form.get("userName"), request.form.get("year"), request.form.get("month"))
         ChessDB.add_multiple_Games(gameCol, flask_login.current_user.id, 'Chess.com')
-        loading = False
-        flash('not_loading', 'loading')
         return flask.redirect(flask.url_for('viewGames'))
-    if request.method == "POST": #and not request.form.get('is_loading'):
-        print("returning loading view")
-        loading = True
-        flash('is_loading', 'loading')
-        return render_template('addGames_view.html')
-    loading = False
-    flash('not_loading', 'loading')
     return render_template('addGames_view.html')
 
 
@@ -166,7 +167,7 @@ if __name__ == '__main__':
     pool = ChessDB.makeConnectionPool(4)
 
     # global loading bool
-    loading = False
+    isLoading = True
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))
