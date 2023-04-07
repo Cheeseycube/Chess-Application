@@ -144,7 +144,7 @@ def add_multiple_Games(Games, userID, platform):
 
     for game in Games.games:
 
-        # encode each game
+        # encode each game's pgn
         try:
             encoded_game = codec.encode(game.pgn)
         except:
@@ -176,9 +176,9 @@ def add_multiple_Games(Games, userID, platform):
         # add each game to the games table
         print(f"add multiple games: userId: {userID} pgnID: {pgn_id['id']}")
         date = game.date.replace(".", "-")
-        sql_statement = ("insert into Games(USERID, PGNID, DATEPLAYED, PLATFORM, WHITE, BLACK)"
-                         "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :white_bv, :black_bv)")
-        cursor.execute(sql_statement, [userID, pgn_id['id'], date, platform, game.white, game.black])
+        sql_statement = ("insert into Games(USERID, PGNID, DATEPLAYED, PLATFORM, WHITE, BLACK, WHITE_ELO, BLACK_ELO)"
+                         "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :white_bv, :black_bv, :white_elo_bv, :black_elo_bv)")
+        cursor.execute(sql_statement, [userID, pgn_id['id'], date, platform, game.white, game.black, int(game.white_elo), int(game.black_elo)])
 
     connection.commit()
 
@@ -264,8 +264,8 @@ def get_all_games(userID):
     columns = [col[0] for col in cursor.description]
     cursor.rowfactory = lambda *args: dict(zip(columns, args))
     data = cursor.fetchall()
-
-    if (data is None):
+    connection.commit()
+    if data is None:
         return "no games found"
     return data
 
@@ -467,8 +467,8 @@ def getUser(user_name):
 if __name__ == '__main__':
     load_dotenv()
     print("welcome")
-    # clearDatabase()
-    # initializeDatabase()
+    #clearDatabase()
+    #initializeDatabase()
 
     # print(get_allUsers())
     # makeConnection()

@@ -151,7 +151,8 @@ def addGames():
 @app.route('/viewGames')
 @flask_login.login_required
 def viewGames():
-    return render_template('games_view.html', pgn=ChessDB.get_most_recent_game(flask_login.current_user.id))
+    games = ChessDB.get_all_games(flask_login.current_user.id)
+    return render_template('games_view.html', games=games)
 
 
 ################################################################################
