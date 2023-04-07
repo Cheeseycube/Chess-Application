@@ -35,9 +35,6 @@ app.secret_key = 'secret-string'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# Our mock database.
-users = []
-
 
 class User(flask_login.UserMixin):
     pass
@@ -65,16 +62,18 @@ def request_loader(request):
     user.name = userData['USERNAME']
     return user
 
+
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return 'Unauthorized', 401
 
+
 @app.context_processor
 def inject_load():
     global isLoading
-    isLoading = not isLoading
     print(isLoading)
     return {'loading': isLoading}
+
 
 # This is the home page
 @app.route('/')
@@ -129,21 +128,22 @@ def logout():
 def view_profile():
     return render_template('profile_view.html', name=flask_login.current_user.name)
 
-@app.route('/addGames',  methods=["GET", "POST"])
+
+@app.route('/addGames', methods=["GET", "POST"])
 @flask_login.login_required
 def addGames():
     global isLoading
     if request.method == "POST":
         # display loading spinner
+        isLoading = True
         with app.app_context():
             turbo.push(turbo.replace(render_template('loading_spinner.html'), 'loading'))
-        print(isLoading)
-        isLoading = False
         # add games
         print("add games tasks are executing")
         gameCol = ChessCom.GameCollection()
         gameCol.get_month_games(request.form.get("userName"), request.form.get("year"), request.form.get("month"))
         ChessDB.add_multiple_Games(gameCol, flask_login.current_user.id, 'Chess.com')
+        isLoading = False
         return flask.redirect(flask.url_for('viewGames'))
     return render_template('addGames_view.html')
 
@@ -152,7 +152,6 @@ def addGames():
 @flask_login.login_required
 def viewGames():
     return render_template('games_view.html', pgn=ChessDB.get_most_recent_game(flask_login.current_user.id))
-
 
 
 ################################################################################
@@ -167,7 +166,7 @@ if __name__ == '__main__':
     pool = ChessDB.makeConnectionPool(4)
 
     # global loading bool
-    isLoading = True
+    isLoading = False
 
     # Start a webserver
     app.run(port=int(os.environ.get('PORT', '8080')))

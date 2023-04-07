@@ -176,9 +176,9 @@ def add_multiple_Games(Games, userID, platform):
         # add each game to the games table
         print(f"add multiple games: userId: {userID} pgnID: {pgn_id['id']}")
         date = game.date.replace(".", "-")
-        sql_statement = ("insert into Games(USERID, PGNID, DATEPLAYED, PLATFORM)"
-                         "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv)")
-        cursor.execute(sql_statement, [userID, pgn_id['id'], date, platform])
+        sql_statement = ("insert into Games(USERID, PGNID, DATEPLAYED, PLATFORM, WHITE, BLACK)"
+                         "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :white_bv, :black_bv)")
+        cursor.execute(sql_statement, [userID, pgn_id['id'], date, platform, game.white, game.black])
 
     connection.commit()
 
@@ -246,6 +246,28 @@ def get_most_recent_game(userID):
     training_data = training_file.read()
     codec = HuffmanCodec.from_data(training_data)
     return codec.decode(pgn)
+
+
+# returns a list of dicts
+def get_all_games(userID):
+    # setting up the connection
+    global pool
+    if pool is None:
+        print("Connection pool was null, aborting get_most_recent_game operation")
+        return -1
+    connection = pool.acquire()
+    cursor = connection.cursor()
+
+    sql_statement = ("select * from Games where USERID = :id_bv order by DATEPLAYED")
+    cursor.execute(sql_statement, [userID])
+
+    columns = [col[0] for col in cursor.description]
+    cursor.rowfactory = lambda *args: dict(zip(columns, args))
+    data = cursor.fetchall()
+
+    if (data is None):
+        return "no games found"
+    return data
 
 
 # Uses the global field "pool" as defined by makeConnectionPool
@@ -415,15 +437,6 @@ def initializeDatabase():
     print("database initialized")
 
 
-def old_getUsers():
-    connection = makeConnection()
-    cursor = connection.cursor()  # defining cursor for later use
-
-    for row in cursor.execute('select userName from Users'):
-        return row[0]
-    connection.commit()
-
-
 # returns some kind of list of all users
 def get_allUsers():
     connection = makeConnection()
@@ -460,7 +473,4 @@ if __name__ == '__main__':
     # print(get_allUsers())
     # makeConnection()
     # makeConnectionPool(4)
-
-    # print(addUser('Gina', 'dkfjsdkfj'))
-
-
+    # print(get_all_games(1))
