@@ -6,7 +6,7 @@
 
 <style>
 h1 {text-align: center;}
-.centerDiv {
+.centerText {
   text-align: center;
   font-size: 24px;
 }
@@ -49,17 +49,17 @@ label{
 
 <form action="{{ url_for("create_account")}}" method="post">
 
-<div class="centerDiv">
+<div class="centerText">
  <label for="userName">User Name:</label>
  <input type="text" id="userName" name="name" placeholder="username--case sensitive">
 </div>
 
-<div class="centerDiv">
+<div class="centerText">
  <label for="password">Password:</label>
  <input type="password" id="password" name="password" placeholder="must be at least 7 chars">
 </div>
 
-<div class="centerDiv">
+<div class="centerText">
  <button type="submit">Submit</button>
 </div>
 

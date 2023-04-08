@@ -9,18 +9,44 @@
 h1 {text-align: center;}
 p {text-align: center;}
 
-
-.centerDiv {
+table, th, td {
+  border:1px solid black;
+  font-size: 24px;
+  text-align: center;
+}
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.centerText {
   text-align: center;
 }
 </style>
 
 <body>
 <!-- This should probably be a smaller banner in the top right of every page-->
-<div class="centerDiv"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium">Log Out</button></a>
+<div class="centerText"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium">Log Out</button></a>
 <a href="profile"><button class=grey style="height:40px;width:90px;font-size: medium">Home</button></a></div>
 
 
-<p>{{pgn}}</p>
+<table class="center">
+  <tr>
+    <th>White</th>
+    <th>White Elo</th>
+    <th>Black</th>
+    <th>Black Elo</th>
+    <th>Date</th>
+  </tr>
+ {%for game in games%}
+   <tr>
+    <td>{{game['WHITE']}}</td>
+    <td>{{game['WHITE_ELO']}}</td>
+    <td>{{game['BLACK']}}</td>
+    <td>{{game['BLACK_ELO']}}</td>
+    <td>{{game['DATEPLAYED']}}</td>
+   </tr>
+ {%endfor%}
+</table>
+
 </body>
 </html>
