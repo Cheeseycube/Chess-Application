@@ -154,6 +154,12 @@ def viewGames():
     games = ChessDB.get_all_games(flask_login.current_user.id)
     return render_template('games_view.html', games=games)
 
+@app.route("/analyze/<pgnid>", methods=['GET', 'POST'])
+@flask_login.login_required
+def analyze_game(given_game):
+    pgnid = given_game['PGNID']
+    return render_template('analyze_game_view.html')
+
 
 ################################################################################
 #

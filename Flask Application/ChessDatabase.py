@@ -258,7 +258,7 @@ def get_all_games(userID):
     connection = pool.acquire()
     cursor = connection.cursor()
 
-    sql_statement = ("select * from Games where USERID = :id_bv order by DATEPLAYED")
+    sql_statement = ("select * from Games where USERID = :id_bv order by DATEPLAYED DESC")
     cursor.execute(sql_statement, [userID])
 
     columns = [col[0] for col in cursor.description]
@@ -266,7 +266,7 @@ def get_all_games(userID):
     data = cursor.fetchall()
     connection.commit()
     if data is None:
-        return "no games found"
+        return []
     return data
 
 
