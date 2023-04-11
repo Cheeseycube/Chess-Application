@@ -152,19 +152,21 @@ def addGames():
 @app.route('/viewGames', methods=['GET', 'POST'])
 @flask_login.login_required
 def viewGames():
-    if request.method == "POST":
+    """if request.method == "POST":
         cur_game = request.form.get("cur_game")
         print(cur_game)
-        return flask.redirect(flask.url_for('analyze_game', pgnid=cur_game))
+        return flask.redirect(flask.url_for('analyze_game', pgnid=cur_game))"""
     games = ChessDB.get_all_games(flask_login.current_user.id)
     return render_template('games_view.html', games=games)
 
-@app.route('/analyze/', defaults={'pgnid' : '1'})
-@app.route('/analyze/<pgnid>', methods=['GET', 'POST'])
+
+@app.route('/analyze/gameID:<gameid>', methods=['GET', 'POST'])
 @flask_login.login_required
-def analyze_game(pgnid):
-    return pgnid
-    #return render_template('analyze_game_view.html')
+def analyze_game(gameid):
+    game = ChessDB.get_game_by_id(gameid)
+    if game is None:
+        return "No game found"
+    return render_template('analyze_game_view.html', given_game=game)
 
 
 ################################################################################

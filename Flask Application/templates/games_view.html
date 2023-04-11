@@ -31,7 +31,7 @@ button[type="submit"]{
 <div class="centerText"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium">Log Out</button></a>
 <a href="profile"><button class=grey style="height:40px;width:90px;font-size: medium">Home</button></a></div>
 
-<form action="{{ url_for('viewGames')}}" method="post">
+<!--<form action="{{ url_for('viewGames')}}" method="post">-->
 <table class="center">
   <tr>
     <th>White</th>
@@ -41,9 +41,9 @@ button[type="submit"]{
     <th>Date</th>
   </tr>
  {%for game in games%}
-    <input type="hidden" id="cur_game" name="cur_game" value="{{ game['PGNID'] }}">
+    <!--<input type="hidden" id="cur_game" name="cur_game" value="{{ game['PGNID'] }}">-->
    <tr>
-    <td><button type="submit">{{game['WHITE']}}</button></td>
+    <td><a href="{{ url_for('analyze_game', gameid=game['GAMEID']) }}"><button class=grey style="font-size: medium">{{game['WHITE']}}</button></a></td>
     <td>{{game['WHITE_ELO']}}</td>
     <td>{{game['BLACK']}}</td>
     <td>{{game['BLACK_ELO']}}</td>
