@@ -9,12 +9,13 @@ from flask_login import LoginManager
 from turbo_flask import Turbo
 
 
-# log in tutorials:
+# log in
 # https://flask-login.readthedocs.io/en/latest/
-# https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
 
 # CX_oracle docs cover basically everything: https://cx-oracle.readthedocs.io/en/latest/
 
+# return json
+#https://stackoverflow.com/questions/22195065/how-to-send-a-json-object-using-html-form-data
 def init_session(connection, requestedTag_ignored):
     cursor = connection.cursor()
     cursor.execute("""
@@ -148,17 +149,22 @@ def addGames():
     return render_template('addGames_view.html')
 
 
-@app.route('/viewGames')
+@app.route('/viewGames', methods=['GET', 'POST'])
 @flask_login.login_required
 def viewGames():
+    if request.method == "POST":
+        cur_game = request.form.get("cur_game")
+        print(cur_game)
+        return flask.redirect(flask.url_for('analyze_game', pgnid=cur_game))
     games = ChessDB.get_all_games(flask_login.current_user.id)
     return render_template('games_view.html', games=games)
 
-@app.route("/analyze/<pgnid>", methods=['GET', 'POST'])
+@app.route('/analyze/', defaults={'pgnid' : '1'})
+@app.route('/analyze/<pgnid>', methods=['GET', 'POST'])
 @flask_login.login_required
-def analyze_game(given_game):
-    pgnid = given_game['PGNID']
-    return render_template('analyze_game_view.html')
+def analyze_game(pgnid):
+    return pgnid
+    #return render_template('analyze_game_view.html')
 
 
 ################################################################################
