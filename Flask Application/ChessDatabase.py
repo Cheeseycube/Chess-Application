@@ -109,6 +109,7 @@ def addPGN(game, encoded_pgn):
     return {'id': -1, 'isDuplicate': False}
 
 
+# Returns a huffman-encoded pgn
 def getPGN(idNum):
     # setting up the connection
     global pool
@@ -126,6 +127,14 @@ def getPGN(idNum):
     if data is None:
         return -1
     return data['PGN']
+
+
+def decodePGN(encoded_pgn):
+    # training the huffman encoder
+    training_file = open('training_data.txt', 'r')
+    training_data = training_file.read()
+    codec = HuffmanCodec.from_data(training_data)
+    return codec.decode(encoded_pgn)
 
 
 # This disallows duplicates for the same user
@@ -288,6 +297,7 @@ def get_game_by_id(given_id):
     columns = [col[0] for col in cursor.description]
     cursor.rowfactory = lambda *args: dict(zip(columns, args))
     data = cursor.fetchone()
+    connection.commit()
     return data
 
 

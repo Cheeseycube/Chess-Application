@@ -166,7 +166,9 @@ def analyze_game(gameid):
     game = ChessDB.get_game_by_id(gameid)
     if game is None:
         return "No game found"
-    return render_template('analyze_game_view.html', given_game=game)
+    encoded_pgn = ChessDB.getPGN(game['PGNID'])
+    pgn = ChessDB.decodePGN(encoded_pgn)
+    return render_template('analyze_game_view.html', given_game=game, given_pgn=pgn)
 
 
 ################################################################################
