@@ -21,32 +21,31 @@ table, th, td {
 .centerText {
   text-align: center;
 }
+.rightText{
+    text-align: right;
+}
 button[type="submit"]{
   font-size: 24px;
 }
 </style>
 <body>
 
-<!-- This should probably be a smaller banner in the top right of every page-->
-<div class="centerText"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium">Log Out</button></a>
-<a href="profile"><button class=grey style="height:40px;width:90px;font-size: medium">Home</button></a></div>
+<!--small banner in the top right of every page-->
+<div class="rightText"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium; margin: 4px 2px;">Log Out</button></a>
+<a href="{{url_for('view_profile')}}"><button class=grey style="height:40px;width:90px;font-size: medium; margin: 4px 2px;">Home</button></a></div>
 
 <!--<form action="{{ url_for('viewGames')}}" method="post">-->
 <table class="center">
   <tr>
-    <th>White</th>
-    <th>White Elo</th>
-    <th>Black</th>
-    <th>Black Elo</th>
+    <th>Time Control</th>
+    <th>Players</th>
     <th>Date</th>
   </tr>
  {%for game in games%}
     <!--<input type="hidden" id="cur_game" name="cur_game" value="{{ game['PGNID'] }}">-->
    <tr>
-    <td><a href="{{ url_for('analyze_game', gameid=game['GAMEID']) }}"><button class=grey style="font-size: medium">{{game['WHITE']}}</button></a></td>
-    <td>{{game['WHITE_ELO']}}</td>
-    <td>{{game['BLACK']}}</td>
-    <td>{{game['BLACK_ELO']}}</td>
+    <td>{{game['TIME_CONTROL']}}</td>
+    <td><a href="{{ url_for('analyze_game', gameid=game['GAMEID']) }}"><button class=grey style="font-size: 24px">{{game['WHITE']}} ({{game['WHITE_ELO']}})<br>{{game['BLACK']}} ({{game['BLACK_ELO']}})</button></a></td>
     <td>{{game['DATEPLAYED']}}</td>
    </tr>
  {%endfor%}

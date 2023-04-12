@@ -2,6 +2,12 @@
 <html>
 <head>
  <title></title>
+ <link href="https://c2a.chesstempo.com/pgnviewer/v2.5/pgnviewerext.vers1.css" media="all" rel="stylesheet" crossorigin>
+<script defer language="javascript" src="https://c1a.chesstempo.com/pgnviewer/v2.5/pgnviewerext.bundle.vers1.js" crossorigin></script>
+
+<link
+href="https://c1a.chesstempo.com/fonts/MaterialIcons-Regular.woff2"
+rel="stylesheet" crossorigin>
 </head>
 
 <style>
@@ -10,15 +16,26 @@ h1 {text-align: center;}
   text-align: center;
   font-size: 24px;
 }
+.rightText{
+    text-align: right;
+}
 p {text-align: center;}
 </style>
 
 <body>
+<!--small banner in the top right of every page-->
+<div class="rightText"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium; margin: 4px 2px;">Log Out</button></a>
+<a href="{{url_for('view_profile')}}"><button class=grey style="height:40px;width:90px;font-size: medium; margin: 4px 2px;">Home</button></a></div>
+
 <h1>{{given_game['WHITE']}} vs {{given_game['BLACK']}}</h1>
 
 <div class="centerText">
-<p>{{given_pgn}}</p>
+<!--<p>{{given_pgn}}</p>-->
 </div>
+
+<ct-pgn-viewer>
+{{given_pgn}}
+</ct-pgn-viewer>
 
 </body>
 </html>

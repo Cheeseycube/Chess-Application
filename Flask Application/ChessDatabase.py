@@ -184,13 +184,16 @@ def add_multiple_Games(Games, userID, platform):
             continue
 
         # add each game to the games table
+
         print(f"add multiple games: userId: {userID} pgnID: {pgn_id['id']}")
         date = game.date.replace(".", "-")
-        sql_statement = ("insert into Games(USERID, PGNID, DATEPLAYED, PLATFORM, WHITE, BLACK, WHITE_ELO, BLACK_ELO)"
-                         "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :white_bv, :black_bv, :white_elo_bv, :black_elo_bv)")
+        print(date)
+        #time control with increment is kinda broken
+        sql_statement = ("insert into Games(USERID, PGNID, DATEPLAYED, PLATFORM, WHITE, BLACK, WHITE_ELO, BLACK_ELO, TIME_CONTROL)"
+                         "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :white_bv, :black_bv, :white_elo_bv, :black_elo_bv, :time_control_bv)")
         cursor.execute(sql_statement,
                        [userID, pgn_id['id'], date, platform, game.white, game.black, int(game.white_elo),
-                        int(game.black_elo)])
+                        int(game.black_elo), int(game.time_control)])
 
     connection.commit()
 
@@ -513,8 +516,8 @@ def getUser(user_name):
 if __name__ == '__main__':
     load_dotenv()
     print("welcome")
-    # clearDatabase()
-    # initializeDatabase()
+    #clearDatabase()
+    #initializeDatabase()
 
     # print(get_allUsers())
     # makeConnection()
