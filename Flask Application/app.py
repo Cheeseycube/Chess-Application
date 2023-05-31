@@ -1,3 +1,4 @@
+import io
 import os
 import flask
 import flask_login
@@ -5,8 +6,17 @@ from flask import Flask, render_template, request, flash, session
 from dotenv import load_dotenv
 import ChessDatabase as ChessDB
 import ChessCom
+import chess.pgn
+import chess
+import re
 from flask_login import LoginManager
 from turbo_flask import Turbo
+from datetime import timedelta
+
+
+
+
+
 
 
 # log in
@@ -72,7 +82,6 @@ def unauthorized_handler():
 @app.context_processor
 def inject_load():
     global isLoading
-    print(isLoading)
     return {'loading': isLoading}
 
 
@@ -135,10 +144,6 @@ def view_profile():
 def addGames():
     global isLoading
     if request.method == "POST":
-        # display loading spinner
-        isLoading = True
-        with app.app_context():
-            turbo.push(turbo.replace(render_template('loading_spinner.html'), 'loading'))
         # add games
         print("add games tasks are executing")
         gameCol = ChessCom.GameCollection()
@@ -160,6 +165,22 @@ def viewGames():
     return render_template('games_view.html', games=games)
 
 
+def convert_seconds(seconds):
+    if seconds < 60:
+        if seconds < 10:
+            return f"0:0{seconds:.1f}"
+        else:
+            return f"0:{seconds:.1f}"
+    if seconds < 3600:  # Less than an hour
+        minutes = seconds // 60
+        seconds = seconds % 60
+        return f"{minutes:02d}:{seconds:02d}"
+    else:  # An hour or more
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        seconds = (seconds % 3600) % 60
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
 @app.route('/analyze/gameID:<gameid>', methods=['GET', 'POST'])
 @flask_login.login_required
 def analyze_game(gameid):
@@ -168,9 +189,47 @@ def analyze_game(gameid):
         return "No game found"
     encoded_pgn = ChessDB.getPGN(game['PGNID'])
     pgn = ChessDB.decodePGN(encoded_pgn)
-    return render_template('analyze_game_view.html', given_game=game, given_pgn=pgn)
 
+    # Parse the PGN using python-chess library
+    parsed_game = chess.pgn.read_game(io.StringIO(pgn))
+    board = parsed_game.board()
+    fen_positions = []
 
+    # Iterate through the moves and collect FEN positions
+    for move in parsed_game.mainline_moves():
+        board.push(move)
+        fen_positions.append(board.fen())
+
+    # timestamp stuff
+    timestamps = []
+    timestamps_string = []
+
+    # gives us a string in hh mm ss format
+    for node in parsed_game.mainline():
+        time_elapsed = node.clock()
+        if time_elapsed is not None:
+            if (time_elapsed < 60):
+                time_elapsed = round(time_elapsed, 2)
+            else:
+                time_elapsed = int(time_elapsed)
+            #time_str = str(timedelta(seconds=time_elapsed))
+            time_str = convert_seconds(time_elapsed)
+            print(f"{node.move}: {time_elapsed}")
+            print(f"{node.move}: {time_str}")
+            timestamps.append(time_elapsed)
+            timestamps_string.append(time_str)
+
+    # time control
+    time_control = int(game['TIME_CONTROL'])
+    time_control_string = str(timedelta(seconds=time_control))
+
+    return render_template('analyze_game_view.html', given_game=game, given_pgn=pgn, fen_positions=fen_positions,
+                           timestamps=timestamps, timestamps_string=timestamps_string, time_control=time_control,
+                           time_control_string=time_control_string)
+
+@app.route('/bootstrap_practice')
+def bootstrap_practice():
+    return render_template('bootstrap_practice.html')
 ################################################################################
 #
 # Initialization is done once at startup time

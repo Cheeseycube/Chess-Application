@@ -1,17 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
- <title></title>
- <link href="https://c2a.chesstempo.com/pgnviewer/v2.5/pgnviewerext.vers1.css" media="all" rel="stylesheet" crossorigin>
-<script defer language="javascript" src="https://c1a.chesstempo.com/pgnviewer/v2.5/pgnviewerext.bundle.vers1.js" crossorigin></script>
-
-<link
-href="https://c1a.chesstempo.com/fonts/MaterialIcons-Regular.woff2"
-rel="stylesheet" crossorigin>
+ <title>AAAAAAAAAAA</title>
+ <link rel="stylesheet" href="{{url_for('static', filename='chessboardjs-1.0.0/css/chessboard-1.0.0.css')}}">
 </head>
 
 <style>
 h1 {text-align: center;}
+
+#chessboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#chessboard {
+    width: 40%;
+    margin-left: 15%;
+}
+
+#buttons {
+    width: 20%;
+    margin-left: 1%;
+    display: flex;
+    flex-direction: column;
+}
+
+#move-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#flip-button-container {
+    display: flex;
+    justify-content: center;
+}
+
+#current-timestamp p {
+    display: inline-block;
+    font-size: 24px;
+    padding-right: 10px;
+}
+#current-timestamp {
+    text-align: center;
+    margin-right: 5%;
+}
+
 .centerText {
   text-align: center;
   font-size: 24px;
@@ -27,15 +63,134 @@ p {text-align: center;}
 <div class="rightText"> <a href="logout"><button class=grey style="height:40px;width:90px;font-size: medium; margin: 4px 2px;">Log Out</button></a>
 <a href="{{url_for('view_profile')}}"><button class=grey style="height:40px;width:90px;font-size: medium; margin: 4px 2px;">Home</button></a></div>
 
+<!--listing the involved players-->
 <h1>{{given_game['WHITE']}} vs {{given_game['BLACK']}}</h1>
+
+<!-- Display the current move's timestamps here -->
+<div id="current-timestamp">
+    <p>White: <span id="white-timestamp"></span></p>
+    <p>Black: <span id="black-timestamp"></span></p>
+</div>
+
+
+
+<!--displaying the chess board and buttons-->
+<div class="centerText" id="chessboard-container">
+    <div id="chessboard"></div>
+    <div id="buttons">
+        <div id="move-buttons">
+            <button class="grey" style="height:60%;width:60%;font-size: xxx-large; color: black; margin: 4px 2px;" onclick="startingPosition()">|<</button>
+            <button class="grey" style="height:60%;width:60%;font-size: xxx-large; color: black; margin: 4px 2px;" onclick="prevMove()"><</button>
+            <button class="grey" style="height:60%;width:60%;font-size: xxx-large; color: black; margin: 4px 2px;" onclick="nextMove()">></button>
+            <button class="grey" style="height:60%;width:60%;font-size: xxx-large; color: black; margin: 4px 2px;" onclick="lastMove()">>|</button>
+        </div>
+        <div id="flip-button-container">
+            <button class="grey" style="height:60%;width:60%;font-size: xxx-large; color: black; margin: 4px 2px;" onclick="flipBoard()">Flip</button>
+            <button onclick="startReplay()">Start Replay</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="{{url_for('static', filename='chessboardjs-1.0.0/js/chessboard-1.0.0.js')}}"></script>
+<script>
+        var board = Chessboard('chessboard', 'start');
+        var fenPositions = {{ fen_positions|tojson }};
+        var timestamps_str = {{ timestamps_string|tojson }};
+        var timestamps_num = {{ timestamps|tojson|safe }};
+        var time_control_str = {{time_control_string|tojson}};
+        var time_control_num = {{ time_control|tojson|safe }};
+        var currentPosition = -1;
+        const startingPositionFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+
+        function updateBoard() {
+            board.position(fenPositions[currentPosition]);
+            updateTimestamp();
+        }
+
+        function updateTimestamp() {
+            var whiteTimestamp = document.getElementById("white-timestamp");
+            var blackTimestamp = document.getElementById("black-timestamp");
+
+            if (currentPosition === -1) {
+                whiteTimestamp.textContent = time_control_str
+                blackTimestamp.textContent = time_control_str
+                // white and black should both be the starting time for the given time control
+            }
+            else if (currentPosition === 0) {
+                // white should be currentPosition, black should be starting time for the given time control
+                whiteTimestamp.textContent = timestamps_str[currentPosition];
+                blackTimestamp.textContent = time_control_str;
+            }
+            else if (currentPosition % 2 === 0) {
+                whiteTimestamp.textContent = timestamps_str[currentPosition];
+                blackTimestamp.textContent = timestamps_str[currentPosition - 1];
+            }
+            else {
+                blackTimestamp.textContent = timestamps_str[currentPosition];
+                whiteTimestamp.textContent = timestamps_str[currentPosition - 1];
+            }
+        }
+
+        function prevMove() {
+            if (currentPosition > 0) {
+                currentPosition--;
+                updateBoard();
+            }
+        }
+
+        function nextMove() {
+            if (currentPosition < fenPositions.length - 1) {
+                currentPosition++;
+                updateBoard();
+            }
+        }
+
+        function startingPosition() {
+            currentPosition = -1;
+            updateTimestamp();
+            board.position(startingPositionFEN);
+        }
+
+        function lastMove() {
+            currentPosition = fenPositions.length - 1;
+            updateBoard();
+        }
+
+        function flipBoard() {
+            board.flip();
+        }
+
+        function startReplay() {
+            startingPosition();
+            var delay = time_control_num - timestamps_num[0];
+            setTimeout(playNextMove, delay);
+        }
+
+        function playNextMove() {
+            if (currentPosition < fenPositions.length - 1) {
+                currentPosition++;
+                updateBoard();
+                var delay = (timestamps_num[currentPosition - 1] - timestamps_num[currentPosition + 1]) * 1000;
+                setTimeout(playNextMove, delay);
+            }
+        }
+
+
+        //updateBoard();
+        updateTimestamp();
+
+</script>
+
+
+
+
 
 <div class="centerText">
 <!--<p>{{given_pgn}}</p>-->
 </div>
-
-<ct-pgn-viewer>
-{{given_pgn}}
-</ct-pgn-viewer>
 
 </body>
 </html>

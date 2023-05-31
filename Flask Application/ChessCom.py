@@ -30,7 +30,7 @@ class GameCollection:
         self.pgns_string = ""
         self.games = []
 
-    # returns a list of games, and sets the   private fields
+    # returns a list of games, and sets the private fields
     def get_month_games(self, user, year, month):
         # Getting all games for a month
         month_games = get_player_games_by_month_pgn(user, year, month)
@@ -67,6 +67,11 @@ class GameCollection:
             # adding the game and pgn to various collections
             self.pgns.append(pgn)
             self.pgns_string += pgn
+            # if time control is invalid set to 0
+            try:
+                game_dict["TimeControl"] = int(game_dict["TimeControl"])
+            except:
+                game_dict["TimeControl"] = 0
             self.games.append(
                 Game(game_dict["Date"], game_dict["White"], game_dict["Black"], game_dict["WhiteElo"],
                      game_dict["BlackElo"], game_dict["Result"], game_dict["Termination"],

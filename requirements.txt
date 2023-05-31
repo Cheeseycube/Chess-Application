@@ -3,5 +3,6 @@ oracledb~=1.2.2
 dahuffman~=0.4.1
 flask~=2.2.3
 python-dotenv~=1.0.0
-bcrypt
+bcrypt~=4.0.1
 turbo-flask
+chess~=1.9.4

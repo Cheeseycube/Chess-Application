@@ -42,24 +42,6 @@ from dahuffman import HuffmanCodec
 # connection pools will be stored in this global variable
 pool = None
 
-
-# this is veeeeeery broken
-def addGame(given_date, given_userID, given_platform, given_pgn):
-    connection = makeConnection()
-    cursor = connection.cursor()  # defining cursor for later use
-
-    # should check for duplicates first...
-
-    # insert into Games table
-    sql_statement = ("insert into Games (USERID, datePlayed, platform, pgn)"
-                     "values(TO_DATE(:newdate, 'YYYY-MM-DD'), :newplatform, :user_id, :newpgn)")
-    cursor.execute(sql_statement, [given_userID, given_date, given_platform, given_pgn])
-    print(cursor.rowcount, "row inserted")
-
-    connection.commit()  # close the connection
-    print("connection closed")
-
-
 def addPGN(game, encoded_pgn):
     # setting up the connection
     global pool
@@ -95,14 +77,14 @@ def addPGN(game, encoded_pgn):
         error_file.write(game.pgn + "\n")
         error_file.write(game.link + "\n\n")
         connection.commit()
-        # return the original in the case of duplicate
+        # returning the original in the case of a duplicate
         sql_statement = "select PGNID from PGNS WHERE PGN = :encoded_pgn_bv"
         cursor.execute(sql_statement, [encoded_pgn])
         columns = [col[0] for col in cursor.description]
         cursor.rowfactory = lambda *args: dict(zip(columns, args))
         data = cursor.fetchone()
         if data is None:
-            print("this should literally be impossible")
+            print("unknown error on line 86 in ChessDatabase.py")
         else:
             return {'id': data["PGNID"], 'isDuplicate': True}
 
@@ -186,6 +168,7 @@ def add_multiple_Games(Games, userID, platform):
         # add each game to the games table
 
         print(f"add multiple games: userId: {userID} pgnID: {pgn_id['id']}")
+        print(f"{game.link}")
         date = game.date.replace(".", "-")
         print(date)
         #time control with increment is kinda broken
@@ -193,7 +176,7 @@ def add_multiple_Games(Games, userID, platform):
                          "values(:id_bv, :pgn_id_bv, TO_DATE(:date_bv, 'YYYY-MM-DD'), :platform_bv, :white_bv, :black_bv, :white_elo_bv, :black_elo_bv, :time_control_bv)")
         cursor.execute(sql_statement,
                        [userID, pgn_id['id'], date, platform, game.white, game.black, int(game.white_elo),
-                        int(game.black_elo), int(game.time_control)])
+                        int(game.black_elo), game.time_control])
 
     connection.commit()
 
